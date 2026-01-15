@@ -732,36 +732,30 @@
             const grid = document.getElementById('productGrid');
             grid.innerHTML = '';
 
-            let filteredProducts = products;
-            // 類別過濾：
-// - 點「中美生醫」：以公司別過濾，只顯示中美生醫
-// - 其他類別：維持原本類別過濾（會同時顯示中美製藥與中美生醫，但會用標籤與底色區隔）
-// 先從全部商品開始
-let filteredProducts = products.slice();
+           // ✅ 只保留這一行
+    let filteredProducts = products.slice();
 
-// 只有「中美生醫」這顆按鈕才做公司別過濾
-if (currentCategory === '中美生醫') {
-  filteredProducts = filteredProducts.filter(
-    p => (p.company || '中美製藥') === '中美生醫'
-  );
-}
+    // 只有「中美生醫」按鈕才做公司別過濾
+    if (currentCategory === '中美生醫') {
+        filteredProducts = filteredProducts.filter(
+            p => (p.company || '中美製藥') === '中美生醫'
+        );
+    }
 
-// 其他類別（包含「全部」）都不做公司別排除
-// 只在非「全部 / 非中美生醫」時，才做類別過濾
-if (currentCategory !== 'all' && currentCategory !== '中美生醫') {
-  filteredProducts = filteredProducts.filter(
-    p => p.category === currentCategory
-  );
-}
+    // 其他類別（包含「全部」）不排除公司
+    if (currentCategory !== 'all' && currentCategory !== '中美生醫') {
+        filteredProducts = filteredProducts.filter(
+            p => p.category === currentCategory
+        );
+    }
 
-            }
-
-            if (searchTerm) {
-                filteredProducts = filteredProducts.filter(p =>
-                    p.name.toLowerCase().includes(searchTerm) ||
-                    p.spec.toLowerCase().includes(searchTerm)
-                );
-            }
+    // 🔍 搜尋
+    if (searchTerm) {
+        filteredProducts = filteredProducts.filter(p =>
+            p.name.toLowerCase().includes(searchTerm) ||
+            p.spec.toLowerCase().includes(searchTerm)
+        );
+    }
 
             if (filteredProducts.length === 0) {
                 grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-gray);">找不到符合的產品</div>';
@@ -769,43 +763,44 @@ if (currentCategory !== 'all' && currentCategory !== '中美生醫') {
             }
 
             filteredProducts.forEach((product) => {
-                const sampleQty = 1;
-                const finalPrice = calculateFinalPrice(product, sampleQty);
+    const sampleQty = 1;
+    const finalPrice = calculateFinalPrice(product, sampleQty);
 
-                const card = document.createElement('div');
-                card.className = 'product-card' + (((product.company || '中美製藥') === '中美生醫') ? ' biomed' : '');
+    const card = document.createElement('div');
+    card.className =
+        'product-card' +
+        (((product.company || '中美製藥') === '中美生醫') ? ' biomed' : '');
 
-                let discountBadgeHTML = '';
-                let finalPriceHTML = '';
+    let discountBadgeHTML = '';
+    let finalPriceHTML = '';
 
-                if (product.discount === 'buy1get1') {
-                    discountBadgeHTML = '<div class="discount-badge">買一送一</div>';
-                    finalPriceHTML = `<div class="final-price">實付：NT$ ${finalPrice}/個</div>`;
-                } else if (product.discount === 'sendon70') {
-                    discountBadgeHTML = '<div class="discount-badge sendon">仙同7折</div>';
-                    finalPriceHTML = `<div class="final-price">優惠價：NT$ ${finalPrice}</div>`;
-                }
+    if (product.discount === 'buy1get1') {
+        discountBadgeHTML = '<div class="discount-badge">買一送一</div>';
+        finalPriceHTML = `<div class="final-price">實付：NT$ ${finalPrice}/個</div>`;
+    } else if (product.discount === 'sendon70') {
+        discountBadgeHTML = '<div class="discount-badge sendon">仙同7折</div>';
+        finalPriceHTML = `<div class="final-price">優惠價：NT$ ${finalPrice}</div>`;
+    }
 
-                const company = (product.company || '中美製藥');
-                const companyBadgeHTML = (company === '中美生醫')
-                    ? '<div class="company-badge biomed">中美生醫</div>'
-                    : '';
+    const company = (product.company || '中美製藥');
+    const companyBadgeHTML =
+        company === '中美生醫'
+            ? '<div class="company-badge biomed">中美生醫</div>'
+            : '';
 
-                }
+    // ✅ 這一段你原本「完全缺失」
+    card.innerHTML = `
+        <div class="product-name">${product.name}</div>
+        ${companyBadgeHTML}
+        <div class="product-spec">${product.spec}</div>
+        <div class="product-price">原價：NT$ ${product.price}</div>
+        ${finalPriceHTML}
+        ${discountBadgeHTML}
+    `;
 
-                card.innerHTML = `
-                    <div class="product-name">${product.name}</div>
-                    ${companyBadgeHTML}
-                    <div class="product-spec">${product.spec}</div>
-                    <div class="product-price">原價 NT$ ${product.price}</div>
-                    ${finalPriceHTML}
-                    ${discountBadgeHTML}
-                `;
-
-                card.addEventListener('click', () => addToCart(product));
-                grid.appendChild(card);
-            });
-        }
+    card.addEventListener('click', () => addToCart(product));
+    grid.appendChild(card);
+});
 
         function addToCart(product) {
             const existingItem = cart.find(item =>
