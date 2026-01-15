@@ -736,11 +736,23 @@
             // 類別過濾：
 // - 點「中美生醫」：以公司別過濾，只顯示中美生醫
 // - 其他類別：維持原本類別過濾（會同時顯示中美製藥與中美生醫，但會用標籤與底色區隔）
-            if (currentCategory === '中美生醫') {
-                filteredProducts = filteredProducts.filter(p => (p.company || '中美製藥') === '中美生醫');
-            } else if (currentCategory !== 'all') {
-                filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
-            }
+// 先從全部商品開始
+let filteredProducts = products.slice();
+
+// 只有「中美生醫」這顆按鈕才做公司別過濾
+if (currentCategory === '中美生醫') {
+  filteredProducts = filteredProducts.filter(
+    p => (p.company || '中美製藥') === '中美生醫'
+  );
+}
+
+// 其他類別（包含「全部」）都不做公司別排除
+// 只在非「全部 / 非中美生醫」時，才做類別過濾
+if (currentCategory !== 'all' && currentCategory !== '中美生醫') {
+  filteredProducts = filteredProducts.filter(
+    p => p.category === currentCategory
+  );
+}
 
             }
 
