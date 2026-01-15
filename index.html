@@ -800,10 +800,8 @@
     card.addEventListener('click', () => addToCart(product));
     grid.appendChild(card);
 });
-            
-/* ✅ 就是這一行，你現在缺的 */
-}   // ← renderProducts 在這裡結束
-        
+
+}  
         function addToCart(product) {
             const existingItem = cart.find(item =>
                 item.name === product.name && item.spec === product.spec && (item.company || '中美製藥') === (product.company || '中美製藥')
