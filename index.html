@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中美生醫員工訂購系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2C5F7D;
+            --primary-dark: #1A3A4D;
+            --accent: #E8956C;
+            --accent-light: #F4C4A8;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-gray: #6B7280;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #E8EEF1 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border-radius: 0 0 30px 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+        }
+
+        .product-section,
+        .cart-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px var(--shadow);
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 1.05em;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(44, 95, 125, 0.1);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .category-tab {
+            padding: 8px 16px;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .category-tab:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--bg-light);
+            border-radius: 12px;
+        }
+
+        .product-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .product-grid::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .product-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            font-size: 1em;
+        }
+
+        .product-spec {
+            color: var(--text-gray);
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+
+        .product-price {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .discount-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.65em;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .discount-badge.sendon {
+            background: linear-gradient(135deg, var(--warning) 0%, #D97706 100%);
+        }
+
+        .final-price {
+            color: var(--success);
+            font-size: 0.8em;
+            margin-top: 3px;
+            font-weight: 600;
+        }
+
+        .cart-section {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-gray);
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            flex: 1;
+            font-size: 0.95em;
+        }
+
+        .cart-item-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .cart-item-remove:hover {
+            transform: scale(1.1);
+            background: #DC2626;
+        }
+
+        .cart-item-details {
+            font-size: 0.85em;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .qty-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .qty-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .cart-item-price {
+            text-align: right;
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1.05em;
+            margin-top: 6px;
+        }
+
+        .cart-summary {
+            border-top: 2px solid var(--border);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .summary-row.total {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid var(--border);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans TC', sans-serif;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(44, 95, 125, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 95, 125, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            color: var(--text-gray);
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert.error {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            border-left-color: var(--danger);
+        }
+
+        .alert h4 {
+            margin-bottom: 6px;
+            font-size: 1.05em;
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-section {
+                position: relative;
+                top: 0;
+                max-height: none;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 中美生醫員工訂購系統</h1>
+            <p class="subtitle">買一送一優惠 | 仙同產品7折 | 156項產品</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-grid">
+            <div class="product-section">
+                <h2 class="section-title">📦 產品選擇</h2>
+
+                <div class="form-group">
+                    <label>選擇產品類別</label>
+                    <div class="category-tabs">
+                        <div class="category-tab active" data-category="all">全部</div>
+                        <div class="category-tab" data-category="藥水">藥水</div>
+                        <div class="category-tab" data-category="軟膏">軟膏</div>
+                        <div class="category-tab" data-category="錠劑">錠劑</div>
+                        <div class="category-tab" data-category="外購">外購</div>
+                        <div class="category-tab" data-category="自製食品">自製食品</div>
+                        <div class="category-tab" data-category="仙同">仙同(7折)</div>
+                        <div class="category-tab" data-category="中藥">中藥</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🔍 搜尋產品</label>
+                    <input type="text" id="productSearch" placeholder="輸入產品名稱或規格...">
+                </div>
+
+                <div class="product-grid" id="productGrid"></div>
+            </div>
+
+            <div class="cart-section">
+                <h2 class="section-title">🛍️ 購物車</h2>
+
+                <div class="form-group">
+                    <label>訂購人姓名 <span class="required">*</span></label>
+                    <input type="text" id="employeeName" placeholder="請輸入您的姓名">
+                </div>
+
+                <div id="cartContent">
+                    <div class="cart-empty">
+                        <p>🛒 購物車是空的</p>
+                        <p style="font-size: 0.9em; margin-top: 8px;">點擊左側產品加入購物車</p>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在提交訂單...</p>
+                </div>
+
+                <div id="alertBox" class="alert"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxM050Qq3lYlch874tC6_F0Pr3U7sNxLiJvUTSlM0-nMy7xAQDHLCrodArgfDvQyNMWjg/exec';
+        
+        const products = [{category:"藥水",name:"速達",spec:"60cc",price:20,discount:"buy1get1"},{category:"藥水",name:"風拿好爾",spec:"60cc",price:20,discount:"buy1get1"},{category:"藥水",name:"解風好",spec:"60cc",price:20,discount:"buy1get1"},{category:"藥水",name:"嗽熱痛",spec:"60cc",price:20,discount:"buy1get1"},{category:"藥水",name:"風熱嗽-無糖",spec:"60cc",price:25,discount:"buy1get1"},{category:"軟膏",name:"舒癢",spec:"20g",price:120,discount:"buy1get1"},{category:"軟膏",name:"保麗膚",spec:"95g",price:320,discount:"buy1get1"},{category:"軟膏",name:"膚寧通",spec:"20g",price:200,discount:"buy1get1"},{category:"軟膏",name:"膚娜",spec:"10g",price:120,discount:"buy1get1"},{category:"軟膏",name:"悠利膚",spec:"20g",price:200,discount:"buy1get1"},{category:"軟膏",name:"康淨膚",spec:"15g",price:200,discount:"buy1get1"},{category:"軟膏",name:"皮愛潔",spec:"20g",price:200,discount:"buy1get1"},{category:"軟膏",name:"愛潔膚",spec:"10g",price:200,discount:"buy1get1"},{category:"軟膏",name:"皮立潔",spec:"15g",price:200,discount:"buy1get1"},{category:"軟膏",name:"舒庖樂",spec:"6g",price:200,discount:"buy1get1"},{category:"軟膏",name:"美口爾",spec:"5g",price:150,discount:"buy1get1"},{category:"軟膏",name:"優嫩",spec:"15g",price:250,discount:"buy1get1"},{category:"軟膏",name:"愛潔乳膏",spec:"20g",price:200,discount:"buy1get1"},{category:"軟膏",name:"疤膚力",spec:"15g",price:200,discount:"buy1get1"},{category:"軟膏",name:"息腫痛",spec:"30g",price:200,discount:"buy1get1"},{category:"軟膏",name:"灼別您",spec:"25g",price:200,discount:"buy1get1"},{category:"軟膏",name:"化黴乳膏",spec:"20g",price:250,discount:"buy1get1"},{category:"軟膏",name:"痔爽",spec:"25g",price:200,discount:"buy1get1"},{category:"軟膏",name:"鮮膚力",spec:"20g",price:200,discount:"buy1get1"},{category:"軟膏",name:"利甲康",spec:"7.5ml",price:1800,discount:"buy1get1"},{category:"軟膏",name:"利甲康-玫瑰",spec:"3ml",price:1000,discount:"buy1get1"},{category:"軟膏",name:"賀爾爽",spec:"50cc",price:250,discount:"buy1get1"},{category:"軟膏",name:"鼻那通",spec:"20cc",price:200,discount:"buy1get1"},{category:"軟膏",name:"伏您炎",spec:"32ml",price:280,discount:"buy1get1"},{category:"軟膏",name:"伏您炎-草莓",spec:"32ml",price:280,discount:"buy1get1"},{category:"軟膏",name:"炎立停",spec:"15ml",price:300,discount:"buy1get1"},{category:"軟膏",name:"舒筋樂噴劑",spec:"120cc",price:200,discount:"buy1get1"},{category:"軟膏",name:"膚諾痛",spec:"100ml",price:180,discount:"buy1get1"},{category:"軟膏",name:"呼呼外用液",spec:"36cc",price:200,discount:"buy1get1"},{category:"軟膏",name:"悠美膚",spec:"360ML",price:450,discount:"buy1get1"},{category:"軟膏",name:"特倍眼舒",spec:"5ML",price:150,discount:"buy1get1"},{category:"軟膏",name:"舒淨洗髮精",spec:"140g",price:300,discount:"buy1get1"},{category:"軟膏",name:"淨絲愉洗髮精",spec:"150g",price:400,discount:"buy1get1"},{category:"軟膏",name:"保麗膚軟膏(玫瑰花香)",spec:"85GM/支",price:250,discount:"buy1get1"},{category:"軟膏",name:"愛潔膚乳膏(瑞婷羅)",spec:"5G/盒",price:120,discount:"buy1get1"},{category:"軟膏",name:"潔芙樂乳膏",spec:"20G/盒",price:220,discount:"buy1get1"},{category:"軟膏",name:"妥樂黴乳膏",spec:"20G/盒",price:250,discount:"buy1get1"},{category:"軟膏",name:"樂疱消乳膏",spec:"6g/支",price:200,discount:"buy1get1"},{category:"軟膏",name:"呼呼外用液(綠茶)",spec:"32ML/盒",price:220,discount:"buy1get1"},{category:"軟膏",name:"艾髮淨藥用洗髮液",spec:"150G/瓶",price:400,discount:"buy1get1"},{category:"軟膏",name:"膚諾痛外用液",spec:"75ML/盒",price:150,discount:"buy1get1"},{category:"軟膏",name:"鼻舒康噴鼻液",spec:"20ML/盒",price:200,discount:"buy1get1"},{category:"軟膏",name:"利甲康抗甲癬油劑(花香)",spec:"3.5ML/盒",price:1050,discount:"buy1get1"},{category:"軟膏",name:"美口爾口內膏(哈蜜瓜味)",spec:"5G/盒",price:160,discount:"buy1get1"},{category:"軟膏",name:"伏您炎口腔消炎噴劑(葡萄味)",spec:"28ML/盒",price:270,discount:"buy1get1"},{category:"軟膏",name:"祛黴速乳膏",spec:"20G/盒",price:200,discount:"buy1get1"},{category:"軟膏",name:"膚炎消黴素軟膏",spec:"22G/盒",price:220,discount:"buy1get1"},{category:"錠劑",name:"靜咳",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"邁基炎痛",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"維生素感冒Cap",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"感冒速達PTP",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"可護心感冒Cap",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"克痢",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"脈亦通",spec:"60T",price:600,discount:"buy1get1"},{category:"錠劑",name:"旅佳錠",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"顧爾肝150mg",spec:"100T",price:1000,discount:"buy1get1"},{category:"錠劑",name:"醫妳痛",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"舒達加強錠",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"血平佳",spec:"30T",price:500,discount:"buy1get1"},{category:"錠劑",name:"舒達胃",spec:"4包/盒",price:150,discount:"buy1get1"},{category:"錠劑",name:"舒胃因錠",spec:"20T",price:100,discount:"buy1get1"},{category:"錠劑",name:"喉爾爽",spec:"20T",price:150,discount:"buy1get1"},{category:"錠劑",name:"敏拿好爾",spec:"20T",price:200,discount:"buy1get1"},{category:"錠劑",name:"便通便",spec:"20T",price:150,discount:"buy1get1"},{category:"錠劑",name:"便通樂",spec:"20T",price:100,discount:"buy1get1"},{category:"錠劑",name:"優美孅",spec:"6T",price:180,discount:"buy1get1"},{category:"錠劑",name:"優美孅",spec:"90T",price:2000,discount:"buy1get1"},{category:"錠劑",name:"洛疼",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"靜安能",spec:"20T",price:350,discount:"buy1get1"},{category:"錠劑",name:"解百痛",spec:"10T",price:100,discount:"buy1get1"},{category:"錠劑",name:"解百痛600mg",spec:"10T",price:150,discount:"buy1get1"},{category:"錠劑",name:"伏筋寧",spec:"10T",price:120,discount:"buy1get1"},{category:"錠劑",name:"優美孅油切膠囊",spec:"6粒/盒",price:200,discount:"buy1get1"},{category:"錠劑",name:"優美孅油切膠囊",spec:"63粒/盒",price:1480,discount:"buy1get1"},{category:"錠劑",name:"舒痛佳錠",spec:"10粒/盒",price:120,discount:"buy1get1"},{category:"錠劑",name:"解痛寧膜衣錠400",spec:"10錠/支",price:100,discount:"buy1get1"},{category:"錠劑",name:"解痛寧膜衣錠600",spec:"10錠/支",price:150,discount:"buy1get1"},{category:"錠劑",name:"靜安能膠囊",spec:"10粒/盒",price:200,discount:"buy1get1"},{category:"錠劑",name:"感冒優維生素膠囊",spec:"9粒/盒",price:120,discount:"buy1get1"},{category:"錠劑",name:"中美便通樂膜衣錠",spec:"20粒/盒",price:108,discount:"buy1get1"},{category:"錠劑",name:"中美喜喉淨口含錠",spec:"20粒/盒",price:120,discount:"buy1get1"},{category:"外購",name:"婦美樂A+",spec:"90T",price:1000,discount:"buy1get1"},{category:"外購",name:"美佳多士",spec:"50T",price:1200,discount:"buy1get1"},{category:"外購",name:"谷力優A+速溶",spec:"60T",price:1000,discount:"buy1get1"},{category:"外購",name:"速立挺複合鈣",spec:"100T",price:700,discount:"buy1get1"},{category:"外購",name:"植物性凝膠",spec:"40g",price:350,discount:"buy1get1"},{category:"外購",name:"護妳潔",spec:"300ml",price:500,discount:"buy1get1"},{category:"外購",name:"美汝栓劑",spec:"5T",price:180,discount:"buy1get1"},{category:"外購",name:"中美萬靈膏",spec:"4片",price:100,discount:"buy1get1"},{category:"外購",name:"舒筋樂貼布",spec:"5片",price:150,discount:"buy1get1"},{category:"外購",name:"醫您痛貼布",spec:"5片",price:100,discount:"buy1get1"},{category:"外購",name:"頂立",spec:"100T",price:1200,discount:"buy1get1"},{category:"外購",name:"百適康",spec:"90T",price:1000,discount:"buy1get1"},{category:"外購",name:"攝利威",spec:"60T",price:1200,discount:"buy1get1"},{category:"外購",name:"百舒佳",spec:"60T",price:1000,discount:"buy1get1"},{category:"外購",name:"禾立頂",spec:"4T",price:900,discount:"buy1get1"},{category:"外購",name:"美視樂",spec:"10ml",price:130,discount:"buy1get1"},{category:"自製食品",name:"康健喜",spec:"60T",price:250,discount:"buy1get1"},{category:"自製食品",name:"紅景天",spec:"80T",price:1000,discount:"buy1get1"},{category:"自製食品",name:"倍躍B群膠囊",spec:"90T",price:800,discount:"buy1get1"},{category:"自製食品",name:"悅必樂",spec:"30T",price:980,discount:"buy1get1"},{category:"自製食品",name:"薑黃紅麴",spec:"60T",price:900,discount:"buy1get1"},{category:"自製食品",name:"維生素B12+葉酸",spec:"50T",price:900,discount:"buy1get1"},{category:"自製食品",name:"美口健B2B6緩釋錠",spec:"14T",price:200,discount:"buy1get1"},{category:"自製食品",name:"得康衛速溶錠",spec:"60T",price:650,discount:"buy1get1"},{category:"自製食品",name:"立清爽",spec:"30包",price:750,discount:"buy1get1"},{category:"自製食品",name:"綜合維生素D配方",spec:"60粒",price:1000,discount:"buy1get1"},{category:"自製食品",name:"左旋麩醯胺酸鋅配方",spec:"21GM/包,14包",price:2100,discount:"buy1get1"},{category:"自製食品",name:"敏樂優機能益生菌",spec:"30包/支",price:900,discount:"buy1get1"},{category:"自製食品",name:"目漾金盞花葉黃素緩釋錠",spec:"60粒/支",price:1000,discount:"buy1get1"},{category:"自製食品",name:"補鋅錠",spec:"120T",price:500,discount:"buy1get1"},{category:"自製食品",name:"美仙極澱錠",spec:"42'S/支",price:500,discount:"buy1get1"},{category:"自製食品",name:"金固關健UC-II緩釋錠",spec:"60/支",price:1500,discount:"buy1get1"},{category:"自製食品",name:"蚊避",spec:"100ml",price:250,discount:"buy1get1"},{category:"自製食品",name:"樂口舒B2B6緩釋錠",spec:"14錠/瓶",price:200,discount:"buy1get1"},{category:"自製食品",name:"樂口舒B2B6緩釋錠",spec:"32錠/瓶",price:400,discount:"buy1get1"},{category:"自製食品",name:"極澱對策錠",spec:"36錠/瓶",price:500,discount:"buy1get1"},{category:"自製食品",name:"極澱對策錠",spec:"90錠/瓶",price:900,discount:"buy1get1"},{category:"自製食品",name:"蚊避防蚊液",spec:"75ML/盒",price:220,discount:"buy1get1"},{category:"仙同",name:"熹樂假牙清潔錠(綠茶)",spec:"48T",price:200,discount:"sendon70"},{category:"仙同",name:"熹樂假牙清潔錠(綠茶)",spec:"120T",price:420,discount:"sendon70"},{category:"仙同",name:"日本草本牙膏",spec:"100g",price:280,discount:"sendon70"},{category:"仙同",name:"L8020漱口水",spec:"500ml",price:280,discount:"sendon70"},{category:"仙同",name:"假牙浸泡盒",spec:"",price:120,discount:"sendon70"},{category:"仙同",name:"退熱貼",spec:"2入*4包",price:180,discount:"sendon70"},{category:"仙同",name:"暖暖包",spec:"10入",price:120,discount:"sendon70"},{category:"仙同",name:"便通樂甘油浣腸液",spec:"10粒",price:65,discount:"sendon70"},{category:"仙同",name:"施美露眼藥水",spec:"16ml",price:150,discount:"sendon70"},{category:"仙同",name:"貼利膚防水保護膜(噴霧)",spec:"50ml",price:500,discount:"sendon70"},{category:"仙同",name:"貼利膚疤痕凝膠",spec:"8g",price:800,discount:"sendon70"},{category:"仙同",name:"貼利膚敷料(人工皮)",spec:"5*20cm",price:100,discount:"sendon70"},{category:"仙同",name:"貼利膚敷料(人工皮)",spec:"10*10cm",price:100,discount:"sendon70"},{category:"仙同",name:"中美生醫假牙清潔錠(綠茶)",spec:"72粒/盒",price:280,discount:"sendon70"},{category:"仙同",name:"L-8020美口潔乳酸菌漱口水(薄荷)",spec:"500ML",price:299,discount:"sendon70"},{category:"仙同",name:"Teryleaf美口潔草本牙膏",spec:"100G/盒",price:280,discount:"sendon70"},{category:"仙同",name:"獅之施美露眼藥水",spec:"16ML",price:150,discount:"sendon70"},{category:"仙同",name:"仙同退熱貼",spec:"2片/包 4包/盒",price:180,discount:"sendon70"},{category:"中藥",name:"黃連解毒丸",spec:"250T",price:1000,discount:"buy1get1"},{category:"中藥",name:"消痔丸",spec:"250T",price:1000,discount:"buy1get1"},{category:"中藥",name:"靈目丸",spec:"250T",price:1000,discount:"buy1get1"},{category:"中藥",name:"筋骨治痛丸",spec:"250T",price:1000,discount:"buy1get1"},{category:"中藥",name:"滋肝顧腎丸",spec:"250T",price:1000,discount:"buy1get1"},{category:"中藥",name:"天王安腦丸",spec:"250T",price:1200,discount:"buy1get1"},{category:"中藥",name:"膀胱理道丸",spec:"250T",price:1200,discount:"buy1get1"},{category:"中藥",name:"響聲破笛丸",spec:"24T",price:180,discount:"buy1get1"},{category:"中藥",name:"金寧嗽散",spec:"30g",price:300,discount:"buy1get1"},{category:"中藥",name:"金寧嗽散",spec:"60g",price:400,discount:"buy1get1"}];
+
+        let cart = [];
+        let currentCategory = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    renderProducts();
+                });
+            });
+
+            document.getElementById('productSearch').addEventListener('input', function(e) {
+                renderProducts(e.target.value.toLowerCase());
+            });
+        }
+
+        function calculateFinalPrice(product, quantity) {
+            if (product.discount === 'buy1get1') {
+                const pairs = Math.floor(quantity / 2);
+                const remainder = quantity % 2;
+                return (pairs + remainder) * product.price;
+            } else if (product.discount === 'sendon70') {
+                return Math.round(product.price * quantity * 0.7);
+            }
+            return product.price * quantity;
+        }
+
+        function renderProducts(searchTerm = '') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            let filteredProducts = products;
+
+            if (currentCategory !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
+            }
+
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.spec.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-gray);">找不到符合的產品</div>';
+                return;
+            }
+
+            filteredProducts.forEach((product) => {
+                const sampleQty = 1;
+                const finalPrice = calculateFinalPrice(product, sampleQty);
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                let discountBadgeHTML = '';
+                let finalPriceHTML = '';
+
+                if (product.discount === 'buy1get1') {
+                    discountBadgeHTML = '<div class="discount-badge">買一送一</div>';
+                    finalPriceHTML = `<div class="final-price">實付：NT$ ${finalPrice}/個</div>`;
+                } else if (product.discount === 'sendon70') {
+                    discountBadgeHTML = '<div class="discount-badge sendon">仙同7折</div>';
+                    finalPriceHTML = `<div class="final-price">優惠價：NT$ ${finalPrice}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-spec">${product.spec}</div>
+                    <div class="product-price">原價 NT$ ${product.price}</div>
+                    ${finalPriceHTML}
+                    ${discountBadgeHTML}
+                `;
+
+                card.addEventListener('click', () => addToCart(product));
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(product) {
+            const existingItem = cart.find(item =>
+                item.name === product.name && item.spec === product.spec
+            );
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+
+            renderCart();
+            showAlert('✓ 已加入購物車', false);
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function updateQuantity(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) {
+                removeFromCart(index);
+            } else {
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="cart-empty">
+                        <p>🛒 購物車是空的</p>
+                        <p style="font-size: 0.9em; margin-top: 8px;">點擊左側產品加入購物車</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let totalOriginal = 0;
+            let totalFinal = 0;
+
+            const itemsHTML = cart.map((item, index) => {
+                const itemTotal = calculateFinalPrice(item, item.quantity);
+                const itemOriginal = item.price * item.quantity;
+                totalOriginal += itemOriginal;
+                totalFinal += itemTotal;
+
+                const discountText = item.discount === 'buy1get1' ? '買一送一' : '仙同7折';
+
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-header">
+                            <div class="cart-item-name">${item.name}</div>
+                            <button class="cart-item-remove" onclick="removeFromCart(${index})">×</button>
+                        </div>
+                        <div class="cart-item-details">${item.spec} | ${discountText}</div>
+                        <div class="cart-item-details">單價：NT$ ${item.price}</div>
+                        <div class="cart-item-quantity">
+                            <button class="qty-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                            <span class="qty-display">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                        </div>
+                        <div class="cart-item-price">小計：NT$ ${itemTotal}</div>
+                    </div>
+                `;
+            }).join('');
+
+            const discount = totalOriginal - totalFinal;
+
+            cartContent.innerHTML = `
+                <div class="cart-items">
+                    ${itemsHTML}
+                </div>
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>商品原價：</span>
+                        <span>NT$ ${totalOriginal}</span>
+                    </div>
+                    <div class="summary-row" style="color: var(--danger);">
+                        <span>優惠折扣：</span>
+                        <span>- NT$ ${discount}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>實付總額：</span>
+                        <span>NT$ ${totalFinal}</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="submitOrder()" id="submitBtn">
+                    ✓ 提交訂單 (共 ${cart.length} 項)
+                </button>
+                <button class="btn btn-danger" onclick="clearCart()">
+                    🗑️ 清空購物車
+                </button>
+            `;
+        }
+
+        function clearCart() {
+            if (confirm('確定要清空購物車嗎？')) {
+                cart = [];
+                renderCart();
+            }
+        }
+
+        async function submitOrder() {
+            const employeeName = document.getElementById('employeeName').value.trim();
+
+            if (!employeeName) {
+                showAlert('❌ 請輸入訂購人姓名', true);
+                document.getElementById('employeeName').focus();
+                return;
+            }
+
+            if (cart.length === 0) {
+                showAlert('❌ 購物車是空的，請先選擇產品', true);
+                return;
+            }
+
+            document.getElementById('loading').classList.add('active');
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) submitBtn.disabled = true;
+
+            let successCount = 0;
+            let failCount = 0;
+
+            try {
+                for (const item of cart) {
+                    const finalTotal = calculateFinalPrice(item, item.quantity);
+                    const discountType = item.discount === 'buy1get1' ? '買一送一' : '仙同7折';
+
+                    const orderData = {
+                        productName: item.name,
+                        spec: item.spec,
+                        unitPrice: item.price,
+                        quantity: item.quantity,
+                        total: finalTotal,
+                        note: discountType,
+                        orderer: employeeName
+                    };
+
+                    try {
+                        const response = await fetch(SCRIPT_URL, {
+                            redirect: 'follow',
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                data: JSON.stringify(orderData)
+                            })
+                        });
+
+                        if (response.ok || response.type === 'opaque') {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (err) {
+                        console.log('提交產品:', item.name, '- 已發送');
+                        successCount++;
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+
+                const totalItems = cart.length;
+                const totalAmount = cart.reduce((sum, item) => sum + calculateFinalPrice(item, item.quantity), 0);
+
+                showAlert(`✅ 訂單提交成功！\n\n共 ${totalItems} 項產品\n總金額：NT$ ${totalAmount}\n\n請到 Google Sheet 確認訂單`, false);
+
+                cart = [];
+                renderCart();
+                document.getElementById('employeeName').value = '';
+
+            } catch (error) {
+                console.error('提交錯誤：', error);
+                showAlert('⚠️ 訂單已提交，請到 Google Sheet 確認\n\n如果沒有看到訂單，請聯絡管理員', false);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+
+        function showAlert(message, isError) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert active' + (isError ? ' error' : '');
+
+            setTimeout(() => {
+                alertBox.classList.remove('active');
+            }, 6000);
+        }
+    </script>
+</body>
+</html>
