@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中美生醫員工訂購系統 - Google Sheets 同步版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2C5F7D;
+            --primary-dark: #1A3A4D;
+            --accent: #E8956C;
+            --accent-light: #F4C4A8;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-gray: #6B7280;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #E8EEF1 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px var(--shadow);
+            border-radius: 0 0 30px 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* Alert Box */
+        .alert {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert h3 {
+            color: #92400E;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .alert ul {
+            color: #78350F;
+            margin-left: 20px;
+        }
+
+        .alert li {
+            margin-bottom: 8px;
+        }
+
+        /* Setup Instructions */
+        .setup-box {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px var(--shadow);
+            animation: fadeInUp 0.7s ease-out 0.2s backwards;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--accent);
+            display: inline-block;
+        }
+
+        .setup-steps {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .setup-steps ol {
+            margin-left: 25px;
+        }
+
+        .setup-steps li {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .code-box {
+            background: #1F2937;
+            color: #F9FAFB;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            background: var(--accent-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        /* Form Section */
+        .order-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px var(--shadow);
+            animation: fadeInUp 0.7s ease-out 0.4s backwards;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 1.05em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Noto Sans TC', sans-serif;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(44, 95, 125, 0.1);
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .category-tab {
+            padding: 12px 24px;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .category-tab:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 20px var(--shadow);
+            transform: translateY(-3px);
+        }
+
+        .product-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .product-card.selected {
+            border-color: var(--success);
+            background: #F0FDF4;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .product-spec {
+            color: var(--text-gray);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.3em;
+        }
+
+        .discount-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .discount-badge.sendon {
+            background: linear-gradient(135deg, var(--warning) 0%, #D97706 100%);
+        }
+
+        .final-price {
+            color: var(--success);
+            font-size: 0.9em;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans TC', sans-serif;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(44, 95, 125, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 95, 125, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Search */
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: var(--text-gray);
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 12px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-message h3 {
+            color: #065F46;
+            margin-bottom: 10px;
+        }
+
+        .success-message p {
+            color: #047857;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .category-tabs {
+                flex-direction: column;
+            }
+        }
+
+        .info-box {
+            background: #DBEAFE;
+            border-left: 4px solid #3B82F6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .info-box p {
+            color: #1E40AF;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🛒 中美生醫員工訂購系統</h1>
+            <p class="subtitle">Google Sheets 即時同步版 | 買一送一優惠</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Discount Info Alert -->
+        <div class="alert">
+            <h3>🎉 員購優惠說明</h3>
+            <ul>
+                <li><strong>一般產品：</strong>買一送一（系統自動計算，顯示實付金額）</li>
+                <li><strong>仙同產品：</strong>打7折優惠（無買一送一）</li>
+                <li>優惠已自動套用，您看到的價格即為實付價格</li>
+            </ul>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="setup-box">
+            <h2 class="section-title">📋 Google Sheets 設定教學</h2>
+            
+            <div class="alert" style="background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); border-left-color: #EF4444;">
+                <h3 style="color: #991B1B;">⚠️ 重要：首次使用必須完成以下設定</h3>
+                <p style="color: #7F1D1D;">此網頁需要您自行建立 Google Apps Script 來連接 Google Sheets</p>
+            </div>
+
+            <div class="setup-steps">
+                <h3 style="margin-bottom: 15px;">設定步驟：</h3>
+                <ol>
+                    <li><strong>建立 Google Sheet：</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>前往 Google Sheets 建立新試算表</li>
+                            <li>在第一列建立表頭：<span class="highlight">產品名稱 | 規格 | 單價 | 數量 | 總價 | 備註 | 下單者</span></li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>開啟 Apps Script：</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>在 Google Sheet 中，點選「擴充功能」→「Apps Script」</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>貼上以下程式碼：</strong></li>
+                </ol>
+
+                <div class="code-box">
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    // 將資料加入試算表
+    sheet.appendRow([
+      data.productName,
+      data.spec,
+      data.unitPrice,
+      data.quantity,
+      data.total,
+      data.note,
+      data.orderer,
+      new Date() // 時間戳記
+    ]);
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        'result': 'success',
+        'message': '訂單已新增'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch(error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        'result': 'error',
+        'message': error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+                </div>
+
+                <ol start="4">
+                    <li><strong>部署為網路應用程式：</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>點選「部署」→「新增部署作業」</li>
+                            <li>類型選擇「網路應用程式」</li>
+                            <li>執行身分：選擇「我」</li>
+                            <li>具有存取權的使用者：選擇「所有人」</li>
+                            <li>點選「部署」</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>複製網址：</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>複製「網路應用程式」網址</li>
+                            <li>貼到下方的「Apps Script URL」欄位</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <p><strong>💡 提示：</strong>完成設定後，所有員工的訂單都會即時同步到您的 Google Sheet</p>
+                <p><strong>🔗 分享方式：</strong>將此網頁檔案上傳到您的網站空間，或使用 GitHub Pages 等免費服務</p>
+            </div>
+        </div>
+
+        <!-- Connection Settings -->
+        <div class="order-section">
+            <h2 class="section-title">🔗 連線設定</h2>
+            
+            <div class="form-group">
+                <label>Google Apps Script URL（必填）</label>
+                <input type="text" id="scriptUrl" placeholder="貼上您的 Apps Script 網路應用程式網址">
+                <p style="color: var(--text-gray); font-size: 0.9em; margin-top: 8px;">
+                    範例：https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Google Sheet 連結（選填，方便查看）</label>
+                <input type="text" id="sheetUrl" placeholder="貼上您的 Google Sheet 連結">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="testConnection()">測試連線</button>
+                <button class="btn btn-secondary" onclick="openSheet()">開啟試算表</button>
+            </div>
+
+            <div id="connectionStatus" class="success-message"></div>
+        </div>
+
+        <!-- Order Form -->
+        <div class="order-section">
+            <h2 class="section-title">📝 新增訂單</h2>
+            
+            <div class="form-group">
+                <label>訂購人姓名 *</label>
+                <input type="text" id="employeeName" placeholder="請輸入您的姓名">
+            </div>
+
+            <div class="form-group">
+                <label>選擇產品類別</label>
+                <div class="category-tabs">
+                    <div class="category-tab active" data-category="all">全部產品</div>
+                    <div class="category-tab" data-category="藥水">藥水</div>
+                    <div class="category-tab" data-category="軟膏">軟膏</div>
+                    <div class="category-tab" data-category="錠劑">錠劑</div>
+                    <div class="category-tab" data-category="外購">外購</div>
+                    <div class="category-tab" data-category="自製食品">自製食品</div>
+                    <div class="category-tab" data-category="仙同">仙同 (7折)</div>
+                    <div class="category-tab" data-category="中藥">中藥</div>
+                </div>
+            </div>
+
+            <div class="form-group search-box">
+                <label>🔍 搜尋產品</label>
+                <input type="text" id="productSearch" placeholder="輸入產品名稱或規格...">
+            </div>
+
+            <div class="form-group">
+                <label>選擇產品（點擊卡片選取）</label>
+                <div class="product-grid" id="productGrid"></div>
+            </div>
+
+            <div class="form-group">
+                <label>數量</label>
+                <input type="number" id="quantity" min="1" value="1">
+            </div>
+
+            <div class="form-group">
+                <label>備註（選填）</label>
+                <input type="text" id="orderNote" placeholder="特殊需求或備註">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="submitOrder()" id="submitBtn">
+                    提交訂單到 Google Sheet
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在提交訂單...</p>
+            </div>
+
+            <div id="orderStatus" class="success-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Product Database with discount info
+        const products = [
+            // 藥水類 (買一送一)
+            { category: "藥水", name: "速達", spec: "60cc", price: 20, discount: "buy1get1" },
+            { category: "藥水", name: "風拿好爾", spec: "60cc", price: 20, discount: "buy1get1" },
+            { category: "藥水", name: "解風好", spec: "60cc", price: 20, discount: "buy1get1" },
+            { category: "藥水", name: "嗽熱痛", spec: "60cc", price: 20, discount: "buy1get1" },
+            { category: "藥水", name: "風熱嗽-無糖", spec: "60cc", price: 25, discount: "buy1get1" },
+
+            // 軟膏類 (買一送一)
+            { category: "軟膏", name: "舒癢", spec: "20g", price: 120, discount: "buy1get1" },
+            { category: "軟膏", name: "保麗膚", spec: "95g", price: 320, discount: "buy1get1" },
+            { category: "軟膏", name: "膚寧通", spec: "20g", price: 200, discount: "buy1get1" },
+            { category: "軟膏", name: "膚娜", spec: "10g", price: 120, discount: "buy1get1" },
+            { category: "軟膏", name: "悠利膚", spec: "20g", price: 200, discount: "buy1get1" },
+            { category: "軟膏", name: "保麗膚軟膏(玫瑰花香)", spec: "85GM/支", price: 250, discount: "buy1get1" },
+
+            // 錠劑類 (買一送一)
+            { category: "錠劑", name: "靜咳", spec: "10T", price: 120, discount: "buy1get1" },
+            { category: "錠劑", name: "邁基炎痛", spec: "10T", price: 120, discount: "buy1get1" },
+            { category: "錠劑", name: "維生素感冒Cap", spec: "10T", price: 120, discount: "buy1get1" },
+            { category: "錠劑", name: "優美孅", spec: "90T", price: 2000, discount: "buy1get1" },
+            { category: "錠劑", name: "解百痛600mg", spec: "10T", price: 150, discount: "buy1get1" },
+
+            // 外購類 (買一送一)
+            { category: "外購", name: "婦美樂A+", spec: "90T", price: 1000, discount: "buy1get1" },
+            { category: "外購", name: "美佳多士", spec: "50T", price: 1200, discount: "buy1get1" },
+            { category: "外購", name: "頂立", spec: "100T", price: 1200, discount: "buy1get1" },
+
+            // 自製食品類 (買一送一)
+            { category: "自製食品", name: "康健喜", spec: "60T", price: 250, discount: "buy1get1" },
+            { category: "自製食品", name: "紅景天", spec: "80T", price: 1000, discount: "buy1get1" },
+            { category: "自製食品", name: "薑黃紅麴", spec: "60T", price: 900, discount: "buy1get1" },
+
+            // 仙同類 (7折，無買一送一)
+            { category: "仙同", name: "熹樂假牙清潔錠(綠茶)", spec: "48T", price: 200, discount: "sendon70" },
+            { category: "仙同", name: "熹樂假牙清潔錠(綠茶)", spec: "120T", price: 420, discount: "sendon70" },
+            { category: "仙同", name: "日本草本牙膏", spec: "100g", price: 280, discount: "sendon70" },
+            { category: "仙同", name: "L8020漱口水", spec: "500ml", price: 280, discount: "sendon70" },
+            { category: "仙同", name: "假牙浸泡盒", spec: "", price: 120, discount: "sendon70" },
+            { category: "仙同", name: "退熱貼", spec: "2入*4包", price: 180, discount: "sendon70" },
+            { category: "仙同", name: "暖暖包", spec: "10入", price: 120, discount: "sendon70" },
+            { category: "仙同", name: "便通樂甘油浣腸液", spec: "10粒", price: 65, discount: "sendon70" },
+            { category: "仙同", name: "施美露眼藥水", spec: "16ml", price: 150, discount: "sendon70" },
+            { category: "仙同", name: "貼利膚防水保護膜(噴霧)", spec: "50ml", price: 500, discount: "sendon70" },
+            { category: "仙同", name: "貼利膚疤痕凝膠", spec: "8g", price: 800, discount: "sendon70" },
+            { category: "仙同", name: "貼利膚敷料(人工皮)", spec: "5*20cm", price: 100, discount: "sendon70" },
+            { category: "仙同", name: "貼利膚敷料(人工皮)", spec: "10*10cm", price: 100, discount: "sendon70" },
+
+            // 中藥類 (買一送一)
+            { category: "中藥", name: "黃連解毒丸", spec: "250T", price: 1000, discount: "buy1get1" },
+            { category: "中藥", name: "消痔丸", spec: "250T", price: 1000, discount: "buy1get1" },
+            { category: "中藥", name: "靈目丸", spec: "250T", price: 1000, discount: "buy1get1" },
+        ];
+
+        let currentCategory = 'all';
+        let selectedProduct = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            setupEventListeners();
+            loadSettings();
+        });
+
+        function setupEventListeners() {
+            // Category tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    renderProducts();
+                });
+            });
+
+            // Product search
+            document.getElementById('productSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                renderProducts(searchTerm);
+            });
+
+            // Save settings
+            document.getElementById('scriptUrl').addEventListener('change', saveSettings);
+            document.getElementById('sheetUrl').addEventListener('change', saveSettings);
+        }
+
+        function calculateFinalPrice(product, quantity) {
+            if (product.discount === 'buy1get1') {
+                // 買一送一：每2個只算1個的價錢
+                const pairs = Math.floor(quantity / 2);
+                const remainder = quantity % 2;
+                return (pairs + remainder) * product.price;
+            } else if (product.discount === 'sendon70') {
+                // 7折
+                return Math.round(product.price * quantity * 0.7);
+            }
+            return product.price * quantity;
+        }
+
+        function renderProducts(searchTerm = '') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            let filteredProducts = products;
+
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
+            }
+
+            // Filter by search term
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.spec.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            filteredProducts.forEach((product, index) => {
+                const sampleQty = 1;
+                const finalPrice = calculateFinalPrice(product, sampleQty);
+                
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                if (selectedProduct && selectedProduct.name === product.name && selectedProduct.spec === product.spec) {
+                    card.classList.add('selected');
+                }
+
+                let discountBadgeHTML = '';
+                let finalPriceHTML = '';
+                
+                if (product.discount === 'buy1get1') {
+                    discountBadgeHTML = '<div class="discount-badge">買一送一</div>';
+                    finalPriceHTML = `<div class="final-price">實付：NT$ ${finalPrice}/個</div>`;
+                } else if (product.discount === 'sendon70') {
+                    discountBadgeHTML = '<div class="discount-badge sendon">仙同7折</div>';
+                    finalPriceHTML = `<div class="final-price">優惠價：NT$ ${finalPrice}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-spec">${product.spec}</div>
+                    <div class="product-price">原價 NT$ ${product.price}</div>
+                    ${finalPriceHTML}
+                    ${discountBadgeHTML}
+                `;
+                
+                card.addEventListener('click', () => selectProduct(product));
+                grid.appendChild(card);
+            });
+        }
+
+        function selectProduct(product) {
+            selectedProduct = product;
+            renderProducts(document.getElementById('productSearch').value);
+        }
+
+        function saveSettings() {
+            const scriptUrl = document.getElementById('scriptUrl').value;
+            const sheetUrl = document.getElementById('sheetUrl').value;
+            localStorage.setItem('scriptUrl', scriptUrl);
+            localStorage.setItem('sheetUrl', sheetUrl);
+        }
+
+        function loadSettings() {
+            const scriptUrl = localStorage.getItem('scriptUrl');
+            const sheetUrl = localStorage.getItem('sheetUrl');
+            if (scriptUrl) document.getElementById('scriptUrl').value = scriptUrl;
+            if (sheetUrl) document.getElementById('sheetUrl').value = sheetUrl;
+        }
+
+        function testConnection() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (!scriptUrl) {
+                alert('請先輸入 Google Apps Script URL');
+                return;
+            }
+
+            const statusDiv = document.getElementById('connectionStatus');
+            statusDiv.innerHTML = '<h3>🔄 測試連線中...</h3><p>請稍候...</p>';
+            statusDiv.classList.add('active');
+
+            // Test connection with dummy data
+            fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productName: '測試連線',
+                    spec: 'TEST',
+                    unitPrice: 0,
+                    quantity: 0,
+                    total: 0,
+                    note: '這是測試訂單，可以刪除',
+                    orderer: '系統測試'
+                })
+            }).then(() => {
+                statusDiv.innerHTML = '<h3>✅ 連線成功！</h3><p>您的 Google Sheet 設定正確，可以開始使用了。</p>';
+            }).catch(error => {
+                statusDiv.innerHTML = '<h3>❌ 連線失敗</h3><p>請檢查您的 Apps Script URL 是否正確，並確認已正確部署。</p>';
+                statusDiv.style.background = 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)';
+                statusDiv.style.borderLeftColor = '#EF4444';
+            });
+        }
+
+        function openSheet() {
+            const sheetUrl = document.getElementById('sheetUrl').value.trim();
+            if (!sheetUrl) {
+                alert('請先輸入 Google Sheet 連結');
+                return;
+            }
+            window.open(sheetUrl, '_blank');
+        }
+
+        async function submitOrder() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const orderNote = document.getElementById('orderNote').value.trim();
+
+            // Validation
+            if (!scriptUrl) {
+                alert('請先設定 Google Apps Script URL');
+                document.getElementById('scriptUrl').focus();
+                return;
+            }
+
+            if (!employeeName) {
+                alert('請輸入訂購人姓名');
+                document.getElementById('employeeName').focus();
+                return;
+            }
+
+            if (!selectedProduct) {
+                alert('請選擇產品');
+                return;
+            }
+
+            if (!quantity || quantity < 1) {
+                alert('請輸入有效數量');
+                return;
+            }
+
+            // Calculate final price
+            const finalTotal = calculateFinalPrice(selectedProduct, quantity);
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('submitBtn').disabled = true;
+
+            // Prepare data
+            const orderData = {
+                productName: selectedProduct.name,
+                spec: selectedProduct.spec,
+                unitPrice: selectedProduct.price,
+                quantity: quantity,
+                total: finalTotal,
+                note: `${orderNote} | ${selectedProduct.discount === 'buy1get1' ? '買一送一' : '仙同7折'}`,
+                orderer: employeeName
+            };
+
+            try {
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                // Show success message
+                const statusDiv = document.getElementById('orderStatus');
+                statusDiv.innerHTML = `
+                    <h3>✅ 訂單提交成功！</h3>
+                    <p><strong>${selectedProduct.name}</strong> x ${quantity}</p>
+                    <p>實付金額：NT$ ${finalTotal}</p>
+                    <p>訂單已同步到 Google Sheet</p>
+                `;
+                statusDiv.classList.add('active');
+
+                // Reset form
+                document.getElementById('quantity').value = 1;
+                document.getElementById('orderNote').value = '';
+                selectedProduct = null;
+                renderProducts();
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    statusDiv.classList.remove('active');
+                }, 5000);
+
+            } catch (error) {
+                alert('提交失敗：' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
